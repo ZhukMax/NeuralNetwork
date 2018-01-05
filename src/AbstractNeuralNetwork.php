@@ -1,8 +1,6 @@
 <?php
 namespace Zhukmax\NeuralNetwork;
 
-use Zhukmax\NeuralNetwork\Nodes\Node;
-
 /**
  * Class AbstractNeuralNetwork
  * @package Zhukmax\NeuralNetwork
