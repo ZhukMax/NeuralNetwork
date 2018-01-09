@@ -7,6 +7,9 @@ namespace Zhukmax\NeuralNetwork;
  */
 abstract class AbstractNeuralNetwork implements NeuralNetworkInterface
 {
+    const LAYER = "L";
+    const NODE = "N";
+
     /**
      * @var string
      */
@@ -31,15 +34,31 @@ abstract class AbstractNeuralNetwork implements NeuralNetworkInterface
      * @var array
      */
     public $network;
+    /**
+     * The moment
+     * @var float
+     */
+    protected $a;
+    /**
+     * The speed
+     * @var float
+     */
+    protected $e;
 
     /**
-     * NeuralNetwork constructor.
+     * AbstractNeuralNetwork constructor.
      * @param string $title
      * @param array|null $nodes
+     * @param float|null $a
+     * @param float|null $e
      */
-    public function __construct(string $title, $nodes = null)
+    public function __construct(string $title, $nodes = null, $a = null, float $e = null)
     {
         $this->title = $title;
+        // The moment
+        $this->a = $a;
+        // The speed
+        $this->e = $e;
         $this->path = dirname(__DIR__) . '/data/';
         $this->file = $this->path . md5($this->title) . '.ann';
         $this->read();
@@ -60,7 +79,7 @@ abstract class AbstractNeuralNetwork implements NeuralNetworkInterface
             for ($node = 0; $node < $nodes[$layer]; $node++) {
                 $synapsesCount = isset($nodes[$layer - 1])? $nodes[$layer - 1]: 0;
                 for ($i = 0; $i < $synapsesCount; $i++) {
-                    $this->network[$layer][$node][$i] = mt_rand(-10, 10);
+                    $this->network[self::LAYER . $layer][self::NODE . $node][$i] = mt_rand(-100, 100) / 10;
                 }
             }
         }
@@ -92,9 +111,9 @@ abstract class AbstractNeuralNetwork implements NeuralNetworkInterface
     /**
      * @param array $purpose
      * @param array $results
-     * @return float|int
+     * @return string
      */
-    public function errorPercent(array $purpose, array $results)
+    public function errorPercent(array $purpose, array $results) : string
     {
         return round($this->error($purpose, $results) * 100, 2) . '%';
     }
@@ -110,6 +129,8 @@ abstract class AbstractNeuralNetwork implements NeuralNetworkInterface
             static::$epoch     = (int)$data->epoch;
             static::$iteration = (int)$data->iteration;
             $this->network     = $data->network;
+            $this->a = (float)$data->a;
+            $this->e = (float)$data->e;
         }
     }
 
@@ -125,7 +146,9 @@ abstract class AbstractNeuralNetwork implements NeuralNetworkInterface
         file_put_contents($this->file, json_encode([
             'network' => $this->network,
             'epoch' => static::$epoch,
-            'iteration' => static::$iteration
+            'iteration' => static::$iteration,
+            'a' => $this->a,
+            'e' => $this->e
         ]));
     }
 }
